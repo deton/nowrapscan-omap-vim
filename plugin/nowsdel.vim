@@ -21,7 +21,9 @@ function! s:OnCmdlineEnter(type)
     return
   endif
   let op = v:operator
-  " reset v:operator
+  " reset v:operator to be able to detect whether in operator pending mode.
+  " (v:operator remains set until another operator is entered)
+  " XXX: set nows does not work for g?
   exe "normal! g?\<ESC>"
   if op != '' && op != 'g?'
     set nows
