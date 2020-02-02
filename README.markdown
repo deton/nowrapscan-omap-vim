@@ -1,4 +1,4 @@
-# nowsdel.vim
+# nowrapscan-omap.vim
 
 Vim plugin to set `nowrapscan` while search (`/`, `?`) motion used in `d{motion}`.
 
