@@ -11,25 +11,9 @@ if exists('g:loaded_nowsdel')
 endif
 let g:loaded_noswdel = 1
 
-augroup nowsdel
-  autocmd!
-  au CmdlineEnter * call <SID>OnCmdlineEnter(expand("<afile>"))
-augroup END
-
-function! s:OnCmdlineEnter(type)
-  if a:type != '/' && a:type != '?'
-    return
-  endif
-  let op = v:operator
-  " reset v:operator to be able to detect whether in operator pending mode.
-  " (v:operator remains set until another operator is entered)
-  " XXX: set nows does not work for g?
-  exe "normal! g?\<ESC>"
-  if op != '' && op != 'g?'
-    set nows
-  else
-    set ws
-  endif
+function! s:setnows(cmd)
+  set nows
+  return a:cmd
 endfunction
 
 function! s:setws(cmd)
@@ -37,34 +21,48 @@ function! s:setws(cmd)
   return a:cmd
 endfunction
 
-function! s:cmd_or_maparg(cmd)
-  if maparg(a:cmd, 'n') != ''
+function! s:cmd_or_maparg(cmd, mode)
+  if maparg(a:cmd, a:mode) != ''
     return ''
   endif
   return a:cmd
 endfunction
 
 function! s:mapplug()
-  execute 'nnoremap <expr> <Plug>(nowsdel-n) <SID>setws("' . s:cmd_or_maparg('n') . '")'
-  execute 'nnoremap <expr> <Plug>(nowsdel-N) <SID>setws("' . s:cmd_or_maparg('N') . '")'
-  execute 'nnoremap <expr> <Plug>(nowsdel-*) <SID>setws("' . s:cmd_or_maparg('*') . '")'
-  execute 'nnoremap <expr> <Plug>(nowsdel-g*) <SID>setws("' . s:cmd_or_maparg('g*') . '")'
-  execute 'nnoremap <expr> <Plug>(nowsdel-#) <SID>setws("' . s:cmd_or_maparg('#') . '")'
-  execute 'nnoremap <expr> <Plug>(nowsdel-g#) <SID>setws("' . s:cmd_or_maparg('g#') . '")'
-"  nnoremap <script> <silent> <Plug>(nowsdel-n) :<C-U>se ws<CR>:exe "normal! " . v:count . "n"<CR>
-"  nnoremap <script> <silent> <Plug>(nowsdel-N) :<C-U>se ws<CR>:exe "normal! " . v:count . "N"<CR>
-"  nnoremap <script> <silent> <Plug>(nowsdel-*) :<C-U>se ws<CR>:exe "normal! " . v:count . "*"<CR>
-"  nnoremap <script> <silent> <Plug>(nowsdel-g*) :<C-U>se ws<CR>:exe "normal! " . v:count . "g*"<CR>
-"  nnoremap <script> <silent> <Plug>(nowsdel-#) :<C-U>se ws<CR>:exe "normal! " . v:count . "#"<CR>
-"  nnoremap <script> <silent> <Plug>(nowsdel-g#) :<C-U>se ws<CR>:exe "normal! " . v:count . "g#"<CR>
+  execute 'onoremap <expr> <Plug>(nowsdel-o/)  <SID>setnows("' . s:cmd_or_maparg('/', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-n/)  <SID>setws(  "' . s:cmd_or_maparg('/', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-o?)  <SID>setnows("' . s:cmd_or_maparg('?', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-n?)  <SID>setws(  "' . s:cmd_or_maparg('?', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-on)  <SID>setnows("' . s:cmd_or_maparg('n', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-nn)  <SID>setws(  "' . s:cmd_or_maparg('n', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-oN)  <SID>setnows("' . s:cmd_or_maparg('N', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-nN)  <SID>setws(  "' . s:cmd_or_maparg('N', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-o*)  <SID>setnows("' . s:cmd_or_maparg('*', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-n*)  <SID>setws(  "' . s:cmd_or_maparg('*', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-og*) <SID>setnows("' . s:cmd_or_maparg('g*', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-ng*) <SID>setws(  "' . s:cmd_or_maparg('g*', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-o#)  <SID>setnows("' . s:cmd_or_maparg('#', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-n#)  <SID>setws(  "' . s:cmd_or_maparg('#', 'n') . '")'
+  execute 'onoremap <expr> <Plug>(nowsdel-og#) <SID>setnows("' . s:cmd_or_maparg('g#', 'o') . '")'
+  execute 'nnoremap <expr> <Plug>(nowsdel-ng#) <SID>setws(  "' . s:cmd_or_maparg('g#', 'n') . '")'
 endfunction
 
 call s:mapplug()
 if !get(g:, 'nowsdel_no_default_key_mappings', 0)
-  execute 'nmap n <Plug>(nowsdel-n)'   . maparg('n', 'n')
-  execute 'nmap N <Plug>(nowsdel-N)'   . maparg('N', 'n')
-  execute 'nmap * <Plug>(nowsdel-*)'   . maparg('*', 'n')
-  execute 'nmap g* <Plug>(nowsdel-g*)' . maparg('g*', 'n')
-  execute 'nmap # <Plug>(nowsdel-#)'   . maparg('#', 'n')
-  execute 'nmap g# <Plug>(nowsdel-g#)' . maparg('g#', 'n')
+  execute 'omap / <Plug>(nowsdel-o/)' . maparg('/', 'o')
+  execute 'nmap / <Plug>(nowsdel-n/)' . maparg('/', 'n')
+  execute 'omap ? <Plug>(nowsdel-o?)' . maparg('?', 'o')
+  execute 'nmap ? <Plug>(nowsdel-n?)' . maparg('?', 'n')
+  execute 'omap n  <Plug>(nowsdel-on)'  . maparg('n', 'o')
+  execute 'nmap n  <Plug>(nowsdel-nn)'  . maparg('n', 'n')
+  execute 'omap N  <Plug>(nowsdel-oN)'  . maparg('N', 'o')
+  execute 'nmap N  <Plug>(nowsdel-nN)'  . maparg('N', 'n')
+  execute 'omap *  <Plug>(nowsdel-o*)'  . maparg('*', 'o')
+  execute 'nmap *  <Plug>(nowsdel-n*)'  . maparg('*', 'n')
+  execute 'omap g* <Plug>(nowsdel-og*)' . maparg('g*', 'o')
+  execute 'nmap g* <Plug>(nowsdel-ng*)' . maparg('g*', 'n')
+  execute 'omap #  <Plug>(nowsdel-o#)'  . maparg('#', 'o')
+  execute 'nmap #  <Plug>(nowsdel-n#)'  . maparg('#', 'n')
+  execute 'omap g# <Plug>(nowsdel-og#)' . maparg('g#', 'o')
+  execute 'nmap g# <Plug>(nowsdel-ng#)' . maparg('g#', 'n')
 endif

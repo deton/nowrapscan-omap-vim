@@ -3,8 +3,8 @@
 Vim plugin to set `nowrapscan` while search (`/`, `?`) motion used in `d{motion}`.
 
 This plugin
-* sets `wrapscan` for `/`, `?`, `n`, `N`, `*`, `g*`, `#`, `g#`
-* sets `nowrapscan` for `/` or `?` used as motion for operator like `d{motion}`
+* sets `wrapscan`   for `/`, `?`, `n`, `N`, `*`, `g*`, `#`, `g#` for nmap
+* sets `nowrapscan` for `/`, `?`, `n`, `N`, `*`, `g*`, `#`, `g#` for omap
 
 ## Problem
 When cursor is on top of line 169, `d/----<CR>` deletes lines from 169 to 197.
