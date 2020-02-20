@@ -9,7 +9,7 @@ This plugin
 ## Problem
 When cursor is on top of line 169, `d/----<CR>` deletes lines from 169 to 197.
 If item delimiter `----` on line 198 is omitted,
-same operation deletes lines from 31 to 169 by `&wrapscan`.
+same operation deletes lines from 30 to 168 by `&wrapscan`.
 
 File content with line number:
 ```
